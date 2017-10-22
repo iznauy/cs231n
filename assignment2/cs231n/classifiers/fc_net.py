@@ -236,15 +236,16 @@ class FullyConnectedNet(object):
         # self.bn_params[1] to the forward pass for the second batch normalization #
         # layer, etc.                                                              #
         ############################################################################
-        layer_caches, layer_outs = [None] * self.num_layers, [None] * self.num_layers
+        layer_caches, layer_outs, layer_dropout = [None] * self.num_layers, [None] * self.num_layers, [None] * self.num_layers
         layer_outs[0] = X
-        if self.use_batchnorm:
-            for i in xrange(1, self.num_layers):
+        for i in xrange(1, self.num_layers):
+            if self.use_batchnorm:
                 layer_outs[i], layer_caches[i] = affine_batchnorm_relu_forward(layer_outs[i - 1], self.params["w%d" % i], self.params["b%d" % i],
                     self.params["gamma%d" % i], self.params["beta%d" % i], self.bn_params[i - 1])
-        else:
-            for i in xrange(1, self.num_layers):
+            else:
                 layer_outs[i], layer_caches[i] =  affine_relu_forward(layer_outs[i - 1], self.params["w%d" % i], self.params["b%d" % i])
+            if self.use_dropout:
+                layer_outs[i], layer_dropout[i] = dropout_forward(layer_outs[i], self.dropout_param)
         scores, scores_cache = affine_forward(layer_outs[self.num_layers - 1], self.params["w%d" % (self.num_layers)], self.params["b%d" % (self.num_layers)])
         ############################################################################
         #                             END OF YOUR CODE                             #
@@ -270,11 +271,12 @@ class FullyConnectedNet(object):
         ############################################################################
         loss, dscores = softmax_loss(scores, y)
         dout, grads['w%d' % (self.num_layers)], grads['b%d' % (self.num_layers)] = affine_backward(dscores, scores_cache)
-        if self.use_batchnorm:
-            for i in xrange(self.num_layers - 1, 0, -1):
+        for i in xrange(self.num_layers - 1, 0, -1):
+            if self.use_dropout:
+                dout = dropout_backward(dout, layer_dropout[i])
+            if self.use_batchnorm:
                 dout, grads['w%d' % i], grads['b%d' % i], grads["gamma%d" % i], grads["beta%d" % i] = affine_bathcnorm_relu_backward(dout, layer_caches[i])
-        else:
-            for i in xrange(self.num_layers - 1, 0, -1):
+            else:
                 dout, grads['w%d' % i], grads['b%d' % i] = affine_relu_backward(dout, layer_caches[i])
         ############################################################################
         #                             END OF YOUR CODE                             #
