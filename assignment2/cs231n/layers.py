@@ -229,12 +229,12 @@ def batchnorm_backward(dout, cache):
     # results in the dx, dgamma, and dbeta variables.                         #
     ###########################################################################
     x, sample_mean, sample_var, x_norm, gamma, beta, eps = cache
-    dx_norm = dout.dot(gamma)
+    dx_norm = dout * gamma
     d_var = np.sum(-0.5 * (sample_var + eps) ** (-1.5) * (x - sample_mean) * dx_norm, axis=0)
     d_mean = np.sum(dx_norm * (-1.0) / np.sqrt(sample_var + eps), axis=0) - 2 * np.mean(d_var * (x - sample_mean), axis=0)
     dx = dx_norm / np.sqrt(sample_var + eps) + (d_var * 2 * (x - sample_mean) + d_mean) / x.shape[0]
-    dgamma = np.sum(dout, axis=0)
-    dbeta = np.sum(dout * x_norm, axis=0)
+    dbeta = np.sum(dout, axis=0)
+    dgamma = np.sum(dout * x_norm, axis=0)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
@@ -264,7 +264,13 @@ def batchnorm_backward_alt(dout, cache):
     # should be able to compute gradients with respect to the inputs in a     #
     # single statement; our implementation fits on a single 80-character line.#
     ###########################################################################
-    pass
+    x, sample_mean, sample_var, x_norm, gamma, beta, eps = cache
+    dx_norm = dout * gamma
+    d_var = np.sum(-0.5 * (sample_var + eps) ** (-1.5) * (x - sample_mean) * dx_norm, axis=0)
+    d_mean = np.sum(dx_norm * (-1.0) / np.sqrt(sample_var + eps), axis=0) - 2 * np.mean(d_var * (x - sample_mean), axis=0)
+    dx = dx_norm / np.sqrt(sample_var + eps) + (d_var * 2 * (x - sample_mean) + d_mean) / x.shape[0]
+    dbeta = np.sum(dout, axis=0)
+    dgamma = np.sum(dout * x_norm, axis=0)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
