@@ -50,7 +50,7 @@ class ThreeLayerConvNet(object):
         ############################################################################
         C, H, W = input_dim
         self.params['W1'] = weight_scale * np.random.randn(num_filters, C, filter_size, filter_size)
-        self.params['b1'] = np.zeros(filter_size)
+        self.params['b1'] = np.zeros(num_filters)
         self.params['W2'] = weight_scale * np.random.randn((H / 2) * (W / 2) * num_filters, hidden_dim)
         self.params['b2'] = np.zeros(hidden_dim)
         self.params['W3'] = weight_scale * np.random.randn(hidden_dim, num_classes)
