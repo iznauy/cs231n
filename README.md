@@ -21,7 +21,7 @@ Assignment list:
 * Q2: Batch Normalization (30 points) [***done!***]
 * Q3: Dropout (10 points) [***done!***]
 * Q4: ConvNet on CIFAR-10 (30 points) [***done!***]
-* Q5: TensorFlow on CIFAR-10 (10 points)
+* Q5: TensorFlow on CIFAR-10 (10 points) [***done!***]
 
 * Assignment #3
 * Q1: Image Captioning with Vanilla RNNs (40 points)
