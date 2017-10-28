@@ -24,7 +24,7 @@ Assignment list:
 * Q5: TensorFlow on CIFAR-10 (10 points) [***done!***]
 
 * Assignment #3
-* Q1: Image Captioning with Vanilla RNNs (40 points)
+* Q1: Image Captioning with Vanilla RNNs (40 points) [***done!***]
 * Q2: Image Captioning with LSTMs (35 points)
 * Q3: Image Gradients: Saliency maps and Fooling Images (10 points)
 * Q4: Image Generation: Classes, Inversion, DeepDream (15 points)
