@@ -137,7 +137,16 @@ class CaptioningRNN(object):
         # defined above to store loss and gradients; grads[k] should give the      #
         # gradients for self.params[k].                                            #
         ############################################################################
-        pass
+        hidden_state, hidden_state_cache = affine_forward(features, W_proj, b_proj)
+        vec_in_caption, vec_in_caption_cache = word_embedding_forward(captions_in, W_embed)
+        if self.cell_type == 'rnn':
+            hidden_states, rnn_cache = rnn_forward(vec_in_caption, hidden_state, Wx, Wh, b)
+            out, taf_cache = temporal_affine_forward(hidden_states, W_vocab, b_vocab)
+            loss, dout = temporal_softmax_loss(out, captions_out, mask, verbose=False)
+            dhss, grads['W_vocab'], grads['b_vocab'] = temporal_affine_backward(dout, taf_cache)
+            din, dh, grads['Wx'], grads['Wh'], grads['b'] = rnn_backward(dhss, rnn_cache)
+            grads['W_embed'] = word_embedding_backward(din, vec_in_caption_cache)
+            _, grads['W_proj'], grads['b_proj'] = affine_backward(dh, hidden_state_cache)
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
@@ -170,7 +179,7 @@ class CaptioningRNN(object):
           of captions should be the first sampled word, not the <START> token.
         """
         N = features.shape[0]
-        captions = self._null * np.ones((N, max_length), dtype=np.int32)
+        captions = self._null * np.ones((N, max_length + 1), dtype=np.int32)
 
         # Unpack parameters
         W_proj, b_proj = self.params['W_proj'], self.params['b_proj']
@@ -199,8 +208,19 @@ class CaptioningRNN(object):
         # functions; you'll need to call rnn_step_forward or lstm_step_forward in #
         # a loop.                                                                 #
         ###########################################################################
-        pass
+        affine_out, affine_cache = affine_forward(features, W_proj, b_proj) 
+        prev_word_idx = np.array([self._start] * N)
+        prev_h = affine_out
+        prev_c = np.zeros(prev_h.shape)
+        captions[:, 0] = self._start
+        for i in xrange(1, max_length + 1):
+            prev_word = W_embed[prev_word_idx]
+            next_h, _ = rnn_step_forward(prev_word, prev_h, Wx, Wh, b)
+            vocab_affine_out, _ = affine_forward(next_h, W_vocab, b_vocab)
+            captions[:, i] = np.argmax(vocab_affine_out, axis=1)
+            prev_word_idx = captions[:, i]
+            prev_h = next_h
         ############################################################################
         #                             END OF YOUR CODE                             #
         ############################################################################
-        return captions
+        return captions[:, 1:]
